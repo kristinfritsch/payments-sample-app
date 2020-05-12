@@ -18,7 +18,7 @@ export default class CountrySelect extends Vue {
   @Prop({ type: String }) value!: string
   @Prop({ type: String, default: 'Country' }) label!: string
   @Prop({ type: Boolean, default: false }) disabled!: boolean
-  @Prop({ type: Array, default: false }) rules!: Array<Function>
+  @Prop({ type: Array, default: () => [] }) rules!: Array<Function>
 
   items = countries
 
