@@ -188,6 +188,32 @@
             </v-list-item-content>
           </v-list-item>
         </v-list-group>
+
+        <v-list-group>
+          <template #activator>
+            <v-list-item-title>Checkout Sessions APIs</v-list-item-title>
+          </template>
+
+          <v-list-item to="/debug/checkoutSessions" router exact>
+            <v-list-item-content>
+              <v-list-item-title class="list-items pl-2">
+                Overview
+              </v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+
+          <v-list-item
+            v-for="(item, i) in checkoutSessionsLinks"
+            :key="`checkoutSessionsLinks-${i}`"
+            :to="item.to"
+            router
+            exact
+          >
+            <v-list-item-content>
+              <v-list-item-title class="list-items pl-2" v-text="item.title" />
+            </v-list-item-content>
+          </v-list-item>
+        </v-list-group>
       </v-list>
     </v-navigation-drawer>
     <v-app-bar clipped-left fixed app dark color="primary" dense>
@@ -285,20 +311,56 @@ export default class DefaultLayoutsClass extends Vue {
       to: '/debug/businessAccount/bankAccounts/instructions',
     },
     {
-      title: 'POST /businessAccount/banks/sen',
-      to: '/debug/businessAccount/senAccounts/create',
+      title: 'POST /mocks/payments/wire',
+      to: '/debug/payments/mocks/wire',
     },
     {
-      title: 'GET /businessAccount/banks/sen',
-      to: '/debug/businessAccount/senAccounts/fetch',
+      title: 'POST /businessAccount/banks/cbit',
+      to: '/debug/businessAccount/cbitAccounts/create',
     },
     {
-      title: 'GET /businessAccount/banks/sen/{id}',
-      to: '/debug/businessAccount/senAccounts/details',
+      title: 'GET /businessAccount/banks/cbit',
+      to: '/debug/businessAccount/cbitAccounts/fetch',
     },
     {
-      title: 'GET /businessAccount/banks/sen/{id}/instructions',
-      to: '/debug/businessAccount/senAccounts/instructions',
+      title: 'GET /businessAccount/banks/cbit/{id}',
+      to: '/debug/businessAccount/cbitAccounts/details',
+    },
+    {
+      title: 'GET /businessAccount/banks/cbit/{id}/instructions',
+      to: '/debug/businessAccount/cbitAccounts/instructions',
+    },
+    {
+      title: 'POST /businessAccount/banks/xpay',
+      to: '/debug/businessAccount/xpayAccounts/create',
+    },
+    {
+      title: 'GET /businessAccount/banks/xpay',
+      to: '/debug/businessAccount/xpayAccounts/fetch',
+    },
+    {
+      title: 'GET /businessAccount/banks/xpay/{id}',
+      to: '/debug/businessAccount/xpayAccounts/details',
+    },
+    {
+      title: 'GET /businessAccount/banks/xpay/{id}/instructions',
+      to: '/debug/businessAccount/xpayAccounts/instructions',
+    },
+    {
+      title: 'POST /businessAccount/banks/rtp',
+      to: '/debug/businessAccount/rtpAccounts/create',
+    },
+    {
+      title: 'GET /businessAccount/banks/rtp',
+      to: '/debug/businessAccount/rtpAccounts/fetch',
+    },
+    {
+      title: 'GET /businessAccount/banks/rtp/{id}',
+      to: '/debug/businessAccount/rtpAccounts/details',
+    },
+    {
+      title: 'GET /businessAccount/banks/rtp/{id}/instructions',
+      to: '/debug/businessAccount/rtpAccounts/instructions',
     },
     {
       title: 'POST /businessAccount/transfers',
@@ -344,6 +406,10 @@ export default class DefaultLayoutsClass extends Vue {
       to: '/debug/payments/create',
     },
     {
+      title: 'POST /payments/crypto',
+      to: '/debug/payments/crypto/create',
+    },
+    {
       title: 'GET /payments/{id}',
       to: '/debug/payments/details',
     },
@@ -360,18 +426,6 @@ export default class DefaultLayoutsClass extends Vue {
       to: '/debug/payments/refund',
     },
     {
-      title: 'POST /mocks/payments/wire',
-      to: '/debug/payments/mocks/wire',
-    },
-    {
-      title: 'POST /mocks/payments/sen',
-      to: '/debug/payments/mocks/sen',
-    },
-    {
-      title: 'POST /mocks/payments/sepa',
-      to: '/debug/payments/mocks/sepa',
-    },
-    {
       title: 'POST /cards',
       to: '/debug/cards/create',
     },
@@ -386,42 +440,6 @@ export default class DefaultLayoutsClass extends Vue {
     {
       title: 'PUT /cards/{id}',
       to: '/debug/cards/update',
-    },
-    {
-      title: 'POST /banks/wires',
-      to: '/debug/wires/create',
-    },
-    {
-      title: 'GET /banks/wires/{id}',
-      to: '/debug/wires/details',
-    },
-    {
-      title: 'GET /banks/wires/{id}/instructions',
-      to: '/debug/wires/instructions',
-    },
-    {
-      title: 'POST /banks/sepa',
-      to: '/debug/sepa/create',
-    },
-    {
-      title: 'GET /banks/sepa/{id}',
-      to: '/debug/sepa/details',
-    },
-    {
-      title: 'GET /banks/sepa/{id}/instructions',
-      to: '/debug/sepa/instructions',
-    },
-    {
-      title: 'POST /mocks/ach/accounts',
-      to: '/debug/ach/mocks/create',
-    },
-    {
-      title: 'POST /banks/ach',
-      to: '/debug/ach/create',
-    },
-    {
-      title: 'GET /banks/ach/{id}',
-      to: '/debug/ach/details',
     },
     {
       title: 'POST /wallets',
@@ -464,16 +482,16 @@ export default class DefaultLayoutsClass extends Vue {
       to: '/debug/chargebacks/mocks/create',
     },
     {
-      title: 'GET /reversals',
-      to: '/debug/reversals/fetch',
-    },
-    {
       title: 'GET /balances',
       to: '/debug/payments/balances/fetch',
     },
     {
       title: 'POST /paymentTokens',
       to: '/debug/payments/digitalWallets/paymentTokens',
+    },
+    {
+      title: 'GET /presign',
+      to: '/debug/payments/crypto/presign',
     },
   ]
 
@@ -531,18 +549,6 @@ export default class DefaultLayoutsClass extends Vue {
       to: '/debug/wires/instructions',
     },
     {
-      title: 'POST /mocks/ach/accounts',
-      to: '/debug/ach/mocks/create',
-    },
-    {
-      title: 'POST /banks/ach',
-      to: '/debug/ach/create',
-    },
-    {
-      title: 'GET /banks/ach/{id}',
-      to: '/debug/ach/details',
-    },
-    {
       title: 'GET /settlements',
       to: '/debug/settlements/fetch',
     },
@@ -558,22 +564,30 @@ export default class DefaultLayoutsClass extends Vue {
       title: 'GET /chargebacks/{id}',
       to: '/debug/chargebacks/details',
     },
-    {
-      title: 'POST /payouts',
-      to: '/debug/payouts/create',
-    },
-    {
-      title: 'GET /payouts',
-      to: '/debug/payouts/fetch',
-    },
-    {
-      title: 'GET /payouts/{id}',
-      to: '/debug/payouts/details',
-    },
   ]
 
   payoutsLinks = [
     {
+      title: 'POST /addressBook/recipients',
+      to: '/debug/beta/addressBook/create',
+    },
+    {
+      title: 'GET /addressBook/recipients',
+      to: '/debug/beta/addressBook/fetch',
+    },
+    {
+      title: 'GET /addressBook/recipients/{id}',
+      to: '/debug/beta/addressBook/details',
+    },
+    {
+      title: 'PATCH /addressBook/recipients/{id}',
+      to: '/debug/beta/addressBook/patch',
+    },
+    {
+      title: 'DELETE /addressBook/recipients/{id}',
+      to: '/debug/beta/addressBook/delete',
+    },
+    {
       title: 'POST /payouts',
       to: '/debug/payouts/create',
     },
@@ -584,42 +598,6 @@ export default class DefaultLayoutsClass extends Vue {
     {
       title: 'GET /payouts/{id}',
       to: '/debug/payouts/details',
-    },
-    {
-      title: 'POST /banks/wires',
-      to: '/debug/wires/create',
-    },
-    {
-      title: 'GET /banks/wires/{id}',
-      to: '/debug/wires/details',
-    },
-    {
-      title: 'GET /wires/{id}/instructions',
-      to: '/debug/wires/instructions',
-    },
-    {
-      title: 'POST /banks/sepa',
-      to: '/debug/sepa/create',
-    },
-    {
-      title: 'GET /banks/sepa/{id}',
-      to: '/debug/sepa/details',
-    },
-    {
-      title: 'GET /banks/sepa/{id}/instructions',
-      to: '/debug/sepa/instructions',
-    },
-    {
-      title: 'POST /mocks/ach/accounts',
-      to: '/debug/ach/mocks/create',
-    },
-    {
-      title: 'POST /banks/ach',
-      to: '/debug/ach/create',
-    },
-    {
-      title: 'GET /banks/ach/{id}',
-      to: '/debug/ach/details',
     },
     {
       title: 'POST /transfers',
@@ -632,10 +610,6 @@ export default class DefaultLayoutsClass extends Vue {
     {
       title: 'GET /transfers/{id}',
       to: '/debug/wallets/transfers/details',
-    },
-    {
-      title: 'GET /returns',
-      to: '/debug/returns/fetch',
     },
   ]
 
@@ -655,6 +629,10 @@ export default class DefaultLayoutsClass extends Vue {
     {
       title: 'POST /paymentIntents/{id}/expire',
       to: '/debug/paymentIntents/expire',
+    },
+    {
+      title: 'POST /paymentIntents/{id}/refund',
+      to: '/debug/paymentIntents/createCryptoRefund',
     },
   ]
 
@@ -690,6 +668,25 @@ export default class DefaultLayoutsClass extends Vue {
     {
       title: 'GET /transfers/{id}',
       to: '/debug/wallets/transfers/details',
+    },
+  ]
+
+  checkoutSessionsLinks = [
+    {
+      title: 'POST /checkoutSessions',
+      to: '/debug/checkoutSessions/create',
+    },
+    {
+      title: 'GET /checkoutSessions',
+      to: '/debug/checkoutSessions/fetch',
+    },
+    {
+      title: 'GET /checkoutSessions/{id}',
+      to: '/debug/checkoutSessions/details',
+    },
+    {
+      title: 'POST /checkoutSessions/{id}/extend',
+      to: '/debug/checkoutSessions/extend',
     },
   ]
 

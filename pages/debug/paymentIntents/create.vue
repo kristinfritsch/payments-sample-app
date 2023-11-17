@@ -2,10 +2,12 @@
   <v-layout>
     <v-row>
       <v-col cols="12" md="4">
-        <v-form>
+        <v-form v-model="isFormValid">
           <v-text-field
+            v-if="transientIntentSelected"
             v-model="formData.amount"
             label="Payment Intent Amount"
+            :rules="[rules.isNumber, rules.validDecimal, rules.required]"
           />
 
           <v-select
@@ -19,6 +21,7 @@
             v-if="currencySelected"
             v-model="formData.blockchain"
             :items="supportedChains"
+            :rules="[rules.required]"
             label="Blockchain"
           />
 
@@ -26,13 +29,27 @@
             v-if="currencySelected"
             v-model="formData.settlementCurrency"
             :items="supportedCurrencies"
+            :rules="[rules.required]"
             label="Settlement Currency"
           />
 
+          <header>Optional params:</header>
+
+          <v-select
+            v-model="formData.type"
+            :items="intentTypes"
+            label="Payment Intent Type"
+            @change="onIntentTypeChange"
+          />
           <v-text-field
-            v-if="currencySelected"
+            v-if="currencySelected && transientIntentSelected"
             v-model="formData.expiresOn"
             label="Expires On"
+          />
+
+          <v-text-field
+            v-model="formData.merchantWalletId"
+            label="Merchant Wallet Id"
           />
 
           <v-btn
@@ -41,6 +58,7 @@
             class="mb-7"
             color="primary"
             :loading="loading"
+            :disabled="!isFormValid"
             @click.prevent="makeApiCall"
           >
             Make api call
@@ -69,7 +87,11 @@ import { mapGetters } from 'vuex'
 import { v4 as uuidv4 } from 'uuid'
 import RequestInfo from '@/components/RequestInfo.vue'
 import ErrorSheet from '@/components/ErrorSheet.vue'
-import { CreatePaymentIntentPayload } from '@/lib/paymentIntentsApi'
+import {
+  CreateContinuousPaymentIntentPayload,
+  CreateTransientPaymentIntentPayload,
+} from '@/lib/paymentIntentsApi'
+import { isNumber, required, validDecimal } from '@/helpers/validation'
 
 interface CurrencyBlockchainPair {
   currency: string
@@ -89,18 +111,29 @@ interface CurrencyBlockchainPair {
       isMarketplace: 'isMarketplace',
     }),
   },
+  data: () => ({
+    isFormValid: false,
+  }),
 })
 export default class CreatePaymentIntentClass extends Vue {
   formData = {
     idempotencyKey: '',
-    amount: '0.00',
+    amount: '',
     currency: '',
+    merchantWalletId: '',
     settlementCurrency: '',
     blockchain: '',
     expiresOn: '',
+    type: 'transient',
   }
 
-  required = [(v: string) => !!v || 'Field is required']
+  // validation rules
+  rules = {
+    isNumber,
+    required,
+    validDecimal,
+  }
+
   error = {}
   loading = false
   showError = false
@@ -108,6 +141,9 @@ export default class CreatePaymentIntentClass extends Vue {
   supportedCurrencies = ['']
   supportedChains = ['']
   currencySelected = false
+  transientIntentSelected = true
+  continuousIntentSelected = false
+  intentTypes = ['continuous', 'transient']
 
   async mounted() {
     this.currencyBlockchainPairs =
@@ -131,30 +167,69 @@ export default class CreatePaymentIntentClass extends Vue {
     this.currencySelected = true
   }
 
+  onIntentTypeChange() {
+    if (this.formData.type === 'continuous') {
+      this.continuousIntentSelected = true
+      this.transientIntentSelected = false
+    } else if (this.formData.type === 'transient') {
+      this.continuousIntentSelected = false
+      this.transientIntentSelected = true
+    }
+  }
+
   async makeApiCall() {
     this.loading = true
-    const amountDetail = {
-      amount: this.formData.amount,
-      currency: this.formData.currency,
-    }
     const blockchainPaymentMethod = {
       type: 'blockchain',
       chain: this.formData.blockchain,
     }
-    const payload: CreatePaymentIntentPayload = {
-      idempotencyKey: uuidv4(),
-      amount: amountDetail,
-      settlementCurrency: this.formData.settlementCurrency,
-      paymentMethods: [blockchainPaymentMethod],
-      expiresOn: this.formData.expiresOn,
-    }
-    try {
-      await this.$paymentIntentsApi.createPaymentIntent(payload)
-    } catch (error) {
-      this.error = error
-      this.showError = true
-    } finally {
-      this.loading = false
+    if (this.transientIntentSelected) {
+      const amountDetail = {
+        amount: this.formData.amount,
+        currency: this.formData.currency,
+      }
+
+      const payload: CreateTransientPaymentIntentPayload = {
+        idempotencyKey: uuidv4(),
+        amount: amountDetail,
+        settlementCurrency: this.formData.settlementCurrency,
+        paymentMethods: [blockchainPaymentMethod],
+        expiresOn: this.formData.expiresOn,
+      }
+
+      if (this.formData.merchantWalletId !== '') {
+        payload.merchantWalletId = this.formData.merchantWalletId
+      }
+
+      try {
+        await this.$paymentIntentsApi.createTransientPaymentIntent(payload)
+      } catch (error) {
+        this.error = error
+        this.showError = true
+      } finally {
+        this.loading = false
+      }
+    } else if (this.continuousIntentSelected) {
+      const payload: CreateContinuousPaymentIntentPayload = {
+        idempotencyKey: uuidv4(),
+        currency: this.formData.currency,
+        settlementCurrency: this.formData.settlementCurrency,
+        paymentMethods: [blockchainPaymentMethod],
+        type: this.formData.type,
+      }
+
+      if (this.formData.merchantWalletId !== '') {
+        payload.merchantWalletId = this.formData.merchantWalletId
+      }
+
+      try {
+        await this.$paymentIntentsApi.createContinuousPaymentIntent(payload)
+      } catch (error) {
+        this.error = error
+        this.showError = true
+      } finally {
+        this.loading = false
+      }
     }
   }
 }

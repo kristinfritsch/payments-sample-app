@@ -8,7 +8,7 @@ interface PaymentMethod {
   chain: string
 }
 
-export interface CreatePaymentIntentPayload {
+export interface CreateTransientPaymentIntentPayload {
   idempotencyKey: string
   amount: {
     amount: string
@@ -16,7 +16,33 @@ export interface CreatePaymentIntentPayload {
   }
   settlementCurrency: string
   paymentMethods: Array<PaymentMethod>
+  merchantWalletId?: string
   expiresOn: string
+}
+
+export interface CreateContinuousPaymentIntentPayload {
+  idempotencyKey: string
+  currency: string
+  settlementCurrency: string
+  paymentMethods: Array<PaymentMethod>
+  merchantWalletId?: string
+  type: string
+}
+
+export interface CreateCryptoRefundPayload {
+  idempotencyKey: string
+  destination: {
+    address: string
+    chain: string
+    addressTag: string
+  }
+  amount: {
+    currency: string
+  }
+  toAmount: {
+    amount: string
+    currency: string
+  }
 }
 
 const instance = axios.create({
@@ -57,10 +83,23 @@ function getInstance() {
 }
 
 /**
- * Create payment intent
+ * Create transient payment intent
  * @param {*} payload
  */
-function createPaymentIntent(payload: CreatePaymentIntentPayload) {
+function createTransientPaymentIntent(
+  payload: CreateTransientPaymentIntentPayload
+) {
+  const url = '/v1/paymentIntents'
+  return instance.post(url, payload)
+}
+
+/**
+ * Create continuous payment intent
+ * @param {*} payload
+ */
+function createContinuousPaymentIntent(
+  payload: CreateContinuousPaymentIntentPayload
+) {
   const url = '/v1/paymentIntents'
   return instance.post(url, payload)
 }
@@ -81,6 +120,19 @@ function expirePaymentIntent(paymentIntentId: string) {
 function getPaymentIntentById(paymentIntentId: string) {
   const url = `/v1/paymentIntents/${paymentIntentId}`
   return instance.get(url)
+}
+
+/**
+ * Create crypto refund
+ * @param {String} paymentIntentId
+ * @param {*} payload
+ */
+function createCryptoRefund(
+  paymentIntentId: string,
+  payload: CreateCryptoRefundPayload
+) {
+  const url = `/v1/paymentIntents/${paymentIntentId}/refund`
+  return instance.post(url, payload)
 }
 
 /**
@@ -119,6 +171,8 @@ export default {
   getInstance,
   getPaymentIntents,
   getPaymentIntentById,
-  createPaymentIntent,
+  createTransientPaymentIntent,
+  createContinuousPaymentIntent,
   expirePaymentIntent,
+  createCryptoRefund,
 }

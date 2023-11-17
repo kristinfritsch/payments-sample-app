@@ -8,7 +8,13 @@
             v-model="formData.accountNumber"
             label="Account Number"
           />
+          <v-select
+            v-model="formData.currency"
+            :items="currencyTypes"
+            label="Currency"
+          />
           <v-text-field v-model="formData.amount" label="Amount" />
+          <v-select v-model="formData.rail" :items="rails" label="Rail" />
           <v-btn
             v-if="isSandbox"
             depressed
@@ -43,7 +49,7 @@ import { mapGetters } from 'vuex'
 import { getLive } from '../../../../lib/apiTarget'
 import RequestInfo from '../../../../components/RequestInfo.vue'
 import ErrorSheet from '../../../../components/ErrorSheet.vue'
-import { CreateMockPushPaymentPayload } from '@/lib/mocksApi'
+import { CreateMockPushPaymentPayload } from '~/lib/mocksApi'
 @Component({
   components: {
     RequestInfo,
@@ -62,7 +68,13 @@ export default class CreateMockIncomingWireClass extends Vue {
     trackingRef: '',
     accountNumber: '',
     amount: '0.00',
+    currency: 'USD', // Default to USD
+    rail: 'wire',
   }
+
+  currencyTypes = ['USD', 'EUR', 'SGD']
+
+  rails = ['wire', 'rtgs']
 
   isSandbox: Boolean = !getLive()
   required = [(v: string) => !!v || 'Field is required']
@@ -78,7 +90,7 @@ export default class CreateMockIncomingWireClass extends Vue {
     this.loading = true
     const amountDetail = {
       amount: this.formData.amount,
-      currency: 'USD',
+      currency: this.formData.currency,
     }
     const payload: CreateMockPushPaymentPayload = {
       trackingRef: this.formData.trackingRef,
@@ -86,6 +98,7 @@ export default class CreateMockIncomingWireClass extends Vue {
         accountNumber: this.formData.accountNumber,
       },
       amount: amountDetail,
+      rail: this.formData.rail,
     }
 
     try {

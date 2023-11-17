@@ -3,11 +3,27 @@ import axios from 'axios'
 
 import { getAPIHostname } from './apiTarget'
 
+export interface SourceIdentityAddressObject {
+  line1: string
+  line2: string
+  city: string
+  district: string
+  postalCode: string
+  country: string
+}
+
+export interface SourceIdentityObject {
+  type: string
+  name: string
+  addresses: SourceIdentityAddressObject[]
+}
+
 export interface CreatePayoutPayload {
   idempotencyKey: string
   source?: {
     id: string
     type: string
+    identities?: SourceIdentityObject[]
   }
   destination: {
     id: string
@@ -17,7 +33,10 @@ export interface CreatePayoutPayload {
     amount: string
     currency: string
   }
-  metadata: {
+  toAmount?: {
+    currency: string
+  }
+  metadata?: {
     beneficiaryEmail: string
   }
 }
@@ -61,8 +80,13 @@ function getInstance() {
 
 /**
  * Get payouts
- * @param {String} source
+ * @param {String} sourceWalletId
  * @param {String} destination
+ * @param {String} destinationType
+ * @param {String} status
+ * @param {String} sourceCurrency
+ * @param {String} destinationCurrency
+ * @param {String} chain
  * @param {String} from
  * @param {String} to
  * @param {String} pageBefore
@@ -70,8 +94,13 @@ function getInstance() {
  * @param {String} pageSize
  */
 function getPayouts(
-  source: string,
+  sourceWalletId: string,
   destination: string,
+  destinationType: string,
+  status: string,
+  sourceCurrency: string,
+  destinationCurrency: string,
+  chain: string,
   from: string,
   to: string,
   pageBefore: string,
@@ -79,8 +108,13 @@ function getPayouts(
   pageSize: string
 ) {
   const queryParams = {
-    source: nullIfEmpty(source),
+    source: nullIfEmpty(sourceWalletId),
     destination: nullIfEmpty(destination),
+    type: nullIfEmpty(destinationType),
+    status: nullIfEmpty(status),
+    sourceCurrency: nullIfEmpty(sourceCurrency),
+    destinationCurrency: nullIfEmpty(destinationCurrency),
+    chain: nullIfEmpty(chain),
     from: nullIfEmpty(from),
     to: nullIfEmpty(to),
     pageBefore: nullIfEmpty(pageBefore),
@@ -112,38 +146,9 @@ function createPayout(payload: CreatePayoutPayload) {
   return instance.post(url, payload)
 }
 
-/**
- * Get returns
- * @param {String} from
- * @param {String} to
- * @param {String} pageBefore
- * @param {String} pageAfter
- * @param {String} pageSize
- */
-function getReturns(
-  from: string,
-  to: string,
-  pageBefore: string,
-  pageAfter: string,
-  pageSize: string
-) {
-  const queryParams = {
-    from: nullIfEmpty(from),
-    to: nullIfEmpty(to),
-    pageBefore: nullIfEmpty(pageBefore),
-    pageAfter: nullIfEmpty(pageAfter),
-    pageSize: nullIfEmpty(pageSize),
-  }
-
-  const url = '/v1/returns'
-
-  return instance.get(url, { params: queryParams })
-}
-
 export default {
   getInstance,
   getPayouts,
   getPayoutById,
   createPayout,
-  getReturns,
 }
